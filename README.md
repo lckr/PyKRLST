@@ -7,6 +7,8 @@ This library is a python port of the Matlab implementation of the KRLS-T which i
 ## Usage
 
 ```python
+    import pyKRLST
+    import numpy as np
     import matplotlib.pyplot as plt
     from sklearn.gaussian_process.kernels import RBF
 
@@ -28,7 +30,7 @@ This library is a python port of the Matlab implementation of the KRLS-T which i
     krlst = KRLST(kernel=kernel,
                   l=lambda_, 
                   c=c,
-                  M=4,
+                  M=M,
                   forgetmode=mode)
 
     # Train in online fashion using at most four basis elements
@@ -38,20 +40,20 @@ This library is a python port of the Matlab implementation of the KRLS-T which i
     # Predict for unknown data
     y_pred, y_std = krlst.eval(x)
 
-
-    plt.figure()
+    plt.figure(figsize=(10,5))
     plt.plot(x, f(x), 'r:', label=r'$f(x) = x\,\sin(x)$')
-    plt.plot(X, y, 'r.', markersize=10, label='Observations')
+    plt.plot(krlst.Xb, krlst.mu, 'k.', markersize=20, marker="*",label="Dictionary Elements")
+    plt.plot(X, y, 'r.', markersize=15, label='Observations')
     plt.plot(x, y_pred, 'b-', label='Prediction')
     plt.fill(np.concatenate([x, x[::-1]]),
              np.concatenate([y_pred - 1.9600 * y_std,
                             (y_pred + 1.9600 * y_std)[::-1]]),
-             alpha=.5, fc='b', ec='None', label='95% confidence interval')
+             alpha=.25, fc='b', ec='None', label='95% confidence interval')
     plt.xlabel('$x$')
     plt.ylabel('$f(x)$')
     plt.ylim(-10, 20)
     plt.legend(loc='upper left')
-
+    plt.show()
 
 ```
 
