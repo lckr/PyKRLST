@@ -15,7 +15,7 @@
 
 # Authors: Lucas Krauß <lucas.krauss@pm.me>
 #
-# License: MIT 
+# License: MIT
 
 import numpy as np
 import warnings
@@ -27,14 +27,14 @@ class KRLST:
     """Kernel Recursive Least-Squares Tracker Algorithm
 
     Maintains a fixed budget via growing and pruning and regularization.
-    Assumes a fixed value for the lengthscale, the regularization factor and the signal and noise powers.
+    Assumes a fixed value for the lengthscale, the regularization factor and the signal and
+    noise powers.
     """
 
     def __init__(
         self, kernel: Kernel, l: float, c: float, M: int, forgetmode: str = "B2P"
     ):
-        """[summary]
-
+        """
         Args:
             kernel (Kernel): Kernel object
             l (float): Forgetting factor. l \in [0,1]
@@ -58,12 +58,31 @@ class KRLST:
         self._jitter = 1e-10
         self._is_init = False
 
-    def train(self, x: np.ndarray, y: float, t: int):
-        """[summary]
+    def fit(self, X: np.ndarray, Y: np.ndarray, T: np.ndarray):
+        """Observes a single data point and label and updates model with this new observations.
+        The update procedure includes forgetting of past information, adding new basis elements
+        and reducing the size of the basis if its size becomes larger as the specified `M`.
 
         Args:
-            x (np.ndarray): Single data point
+            X (np.ndarray): Array of data points with shape (n_data_points, n_features). Can be
+                of any type.
+            Y (np.ndarray): Float array of labels with shape (n_data_points,). Does not support
+                multilabels.
+            T (np.ndarray): Int array of time indices with shape (n_data_points,).
+        """
+        for x, y, t in zip(X, Y, T):
+            self.observe(x, y, t)
+        return self
+
+    def observe(self, x: np.ndarray, y: float, t: int):
+        """Observes a single data point and label and updates model with this new observations.
+        The update procedure includes forgetting of past information, adding new basis elements
+        and reducing the size of the basis if its size becomes larger as the specified `M`.
+
+        Args:
+            x (np.ndarray): Single data point with shape (1, n_features). Can be of any type
             y (float): Single regression target
+            t (int): time index
         """
         if not self._is_init:  # Initialize model
 
@@ -96,7 +115,8 @@ class KRLST:
                     self.Sigma = self.Sigma / self._lambda
                 else:
                     raise ValueError(
-                        "Undefined forgetting strategy.\nSupported forgetting strategies are 'B2P' and 'UI'."
+                        "Undefined forgetting strategy.\nSupported forgetting strategies"
+                        + "are 'B2P' and 'UI'."
                     )
 
             # Predict new sample
@@ -163,16 +183,16 @@ class KRLST:
                 self.m = self.m - 1
                 self.Xb = self.Xb[smaller, :]
 
-    def eval(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        """[summary]
+    def predict(self, X: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """Predicts mean and variance for potentially unseen data X
 
         Args:
-            x (np.ndarray): [description]
+            X (np.ndarray): Array of data points with shape (n_data_points, n_features)
 
         Returns:
-            float, float: [description]
+            mean_est (np.ndarray), var_est (np.ndarray): Predicted mean and variance
         """
-        kbs = self._kernel(self.Xb, np.atleast_2d(x))
+        kbs = self._kernel(self.Xb, np.atleast_2d(X))
         mean_est = kbs.T @ self.Q @ self.mu
         sf2 = (
             1
@@ -185,5 +205,3 @@ class KRLST:
         var_est = self.s02 * (self._c + sf2)
 
         return mean_est, var_est
-
-
