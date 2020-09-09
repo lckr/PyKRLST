@@ -35,10 +35,10 @@ This library is a python port of the Matlab implementation of the KRLS-T which i
 
     # Train in online fashion using at most four basis elements
     for t, a, b in zip(np.arange(10), X, y):
-        krlst.train(a, b, t)
+        krlst.observe(a, b, t)
 
     # Predict for unknown data
-    y_pred, y_std = krlst.eval(x)
+    y_pred, y_std = krlst.predict(x)
 
     plt.figure(figsize=(10,5))
     plt.plot(x, f(x), 'r:', label=r'$f(x) = x\,\sin(x)$')
