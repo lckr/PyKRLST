@@ -57,6 +57,8 @@ This library is a python port of the Matlab implementation of the KRLS-T which i
 
 ```
 ![](plot.png)
+
+
 Please also refer to the `PyKRLST_demo.ipynb` notebook.
 
 **Note**: This KRLS-T implementation uses `sklearn.gaussian_process.kernel.Kernel` objects to compute the covariances between the data point. This allows the usage of custom kernels that satisfy the `Kernel` interface.  
