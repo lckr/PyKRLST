@@ -32,7 +32,7 @@ class KRLST:
     """
 
     def __init__(
-        self, kernel: Kernel, l: float, c: float, M: int, forgetmode: str = "B2P"
+        self, kernel: Kernel, l: float, c: float, M: int, forgetmode: str = "B2P", jitter=1e-10
     ):
         """
         Args:
@@ -55,7 +55,7 @@ class KRLST:
             raise ValueError("Parameter `forgetmode` can either be 'B2P' or 'UI'.")
         self._forgetmode = forgetmode
 
-        self._jitter = 1e-10
+        self._jitter = jitter
         self._is_init = False
 
     def fit(self, X: np.ndarray, Y: np.ndarray, T: np.ndarray):
@@ -161,7 +161,7 @@ class KRLST:
                         warnings.warn(
                             "Numerical roundoff error is too high. Try increasing jitter noise."
                         )
-                    criterium = np.block([np.ones((1, self.m - 1)), 0])
+                    criterium = np.block([np.ones((self.m - 1)), 0])
                 else:  # MSE pruning
                     errors = (self.Q @ self.mu).reshape(-1) / np.diag(self.Q)
                     criterium = np.abs(errors)
